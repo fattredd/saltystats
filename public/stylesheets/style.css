@@ -1,0 +1,26 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+table, th, td {
+  border-collapse: collapse;
+  text-justify: right;
+  border: 1px solid black;
+  padding: 5px;
+}
+
+.odd {
+  background-color: rgb(207, 230, 250);
+}
+.even {
+  background-color: rgb(232, 250, 228);
+}
+
+.section {
+  padding-top: 10px;
+}

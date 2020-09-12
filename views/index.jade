@@ -1,0 +1,36 @@
+extends layout
+
+block content
+  h1= title
+  .section
+    b Fights:
+    table
+      thead
+        tr
+          th id 
+          th Red 
+          th Blue
+          th Ratio
+        each val,i in fights
+          tr(class=(i % 2 == 0) ? 'odd' : 'even') 
+            td #{val.id} 
+            td #{val.red} 
+            td #{val.blue} 
+            td #{val.ratio}
+  .section
+    b Fighters:
+    table
+      thead
+        tr
+          th Name 
+          th Win 
+          th Loss
+          th Total
+          th Rate
+        each val,i in fighters
+          tr(class=(i % 2 == 0) ? 'odd' : 'even')
+            td #{val.name} 
+            td #{val.win}
+            td #{val.loss}
+            td #{val.total}
+            td #{val.rate}
