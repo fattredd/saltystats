@@ -1,3 +1,27 @@
 #!/usr/bin/env node
 
 // Scraping backend
+const pupp = require('puppeteer');
+const { response } = require('../server');
+
+const options = {
+    height: 1020,
+    width: 1280,
+    url: "https://www.saltybet.com/",
+    img: "scrot.png"
+};
+
+const getPage = async () => {
+    const browser = await pupp.launch({
+        //headless: false,
+        defaultViewport: null, // Allow window to rescale
+        args: [`--window-size=${options.width},${options.height}`]
+    });
+    const page = await browser.newPage();
+    await page.goto(options.url);
+    await page.screenshot({path: options.img});
+  
+    await browser.close();
+};
+
+getPage();
