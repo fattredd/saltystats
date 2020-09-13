@@ -4,4 +4,4 @@
 require("./www");
 
 // Start the web scraper
-
+require("./scraper");
