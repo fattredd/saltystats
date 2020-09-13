@@ -4,8 +4,8 @@ const sqlite3 = require('sqlite3').verbose();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  fightArr = [];
-  fighterArr = [];
+  var fightArr = [];
+  var fighterArr = [];
 
   let db = new sqlite3.Database('../fights.sql', (err) => {
     if (err) throw err;
@@ -13,12 +13,10 @@ router.get('/', function(req, res, next) {
 
     let qry = "SELECT * FROM fighter ORDER BY win/(1.0*(win+loss)) DESC";
     db.each(qry, (err, row) => {
-      console.log("preapp");
       newRow = row;
       newRow.total = row.win+row.loss;
       rate = (row.win/parseFloat(newRow.total)).toFixed(2);
       newRow.rate = rate;
-      console.log("postapp");
       fighterArr.push(newRow);
     });
     

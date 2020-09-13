@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+// Start the web server
+require("./www");
+
+// Start the web scraper
+
