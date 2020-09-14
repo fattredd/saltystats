@@ -32,4 +32,5 @@ I used VSCode as an editor, and DBeaver as a convenient way of watching/editting
 
 - NoSQL instead of SQL
 - Sockets or reactjs?
+- Crop scrots for player images?
 - ```Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0```

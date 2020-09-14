@@ -5,3 +5,6 @@ require("./www");
 
 // Start the web scraper
 require("./scraper");
+
+// Start image processor
+require("./image");

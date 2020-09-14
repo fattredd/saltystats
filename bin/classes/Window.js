@@ -50,7 +50,7 @@ class Window {
     async getScrot(result) {
         // TODO: ensure twitch is loaded
         const now = new Date();
-        const dt = date.format(now, 'YYYY.MM.DD_HH.mm.ss')
+        const dt = date.format(now, 'YYYY.MM.DD_HH.mm.ss');
         await this.page.screenshot({path: this.options.imgPath + dt + `_${this.Red} vs ${this.Blue}` + this.options.imgExt});
     }
 
@@ -123,6 +123,7 @@ class Window {
 
     async fetchData(result) {
         const currState = await this.getState();
+        this.page.screenshot({path: "./public/img/scrot" + this.options.imgExt});
         if (currState == this.lastState) {
             return;
         }
@@ -133,7 +134,7 @@ class Window {
             db.addFighter(this.Blue);
         }
         if (currState == 1) {
-            setTimeout(this.getScrot, 500);
+            this.getScrot();
             this.ratio = await this.getStats();
         } else if (currState == 2 && this.lastState != -1) {
             const winner = await this.getWinner();
@@ -141,7 +142,6 @@ class Window {
             console.log(`The winner is ${winner}!`);
             db.addResult(this.Red, winBool);
             db.addResult(this.Blue, !winBool);
-            console.log(`Adding fight...`);
             db.addFight(this.Red, this.Blue, this.ratio, winner);
         }
         this.lastState = currState;

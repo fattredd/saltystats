@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+const jimp = require("jimp");
+
+const origin = "./public/img/scrot.png";
+const dest = "./public/img/current.jpg";
+
+const watcher = fs.watchFile(origin, (curr,prev) => {
+    jimp.read(origin, (err, file) => {
+        if (err) console.log("Failed to load img.");
+        file
+            .crop(300, 160,  680, 512)
+            .quality(60)
+            .write(dest);
+    });
+});
