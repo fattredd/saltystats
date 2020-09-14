@@ -7,7 +7,7 @@ router.get('/', function(req, res, next) {
   var fightArr = [];
   var fighterArr = [];
 
-  let db = new sqlite3.Database('../fights.sql', (err) => {
+  let db = new sqlite3.Database('./fights.sqlite', (err) => {
     if (err) throw err;
     console.log('Opened database.');
 

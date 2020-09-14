@@ -5,11 +5,14 @@ const Window = require('./classes/Window.js');
 
 let window = new Window();
 
-const scraper = async () => {
-    window.init(() => {
-        window.getFighters();
-        //window.close();
-    });
-}
-
-scraper();
+(async () => {
+    await window.init();
+    try {
+        setInterval(()=> {
+            window.fetchData();
+        }, 5000);
+    } catch (e) {
+        console.log("Connection broken");
+    }
+    //window.close();
+})();
