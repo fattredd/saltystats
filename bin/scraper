@@ -1,33 +1,15 @@
 #!/usr/bin/env node
 
 // Scraping backend
-const pupp = require('puppeteer');
-const { response } = require('../server');
+const Window = require('./classes/Window.js');
 
-const options = {
-    height: 1020,
-    width: 1280,
-    url: "https://www.saltybet.com/",
-    img: "scrot.png"
-};
+let window = new Window();
 
-const getPage = async () => {
-    const browser = await pupp.launch({
-        headless: false,
-        defaultViewport: null, // Allow window to rescale
-        args: [`--window-size=${options.width},${options.height}`]
+const scraper = async () => {
+    window.init(() => {
+        window.getFighters();
+        //window.close();
     });
-    const page = await browser.newPage();
-    await page.goto(options.url);
+}
 
-    const elem = await page.$('#odds');
-    if (!elem) console.log("Error finding element");
-    const text = await elem.getProperty("innerText").then(x => x.jsonValue());
-    console.log(text.trim());
-    
-    //await page.screenshot({path: options.img});
-  
-    await browser.close();
-};
-
-getPage();
+scraper();
