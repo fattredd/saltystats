@@ -10,7 +10,8 @@ class Window {
             width: 1280,
             url: "https://www.saltybet.com/",
             imgPath: "./public/img/scrot/",
-            imgExt: ".png"
+            imgExt: ".png",
+            headless: true
         };
         this.lastState = -1;
         this.ratio = "";
@@ -22,7 +23,7 @@ class Window {
 
     async init(callback) {
         this.browser = await pupp.launch({
-            headless: false,
+            headless: this.options.headless,
             defaultViewport: null, // Allow window to rescale
             args: [`--window-size=${this.options.width},${this.options.height}`],
             executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe' // Windows
