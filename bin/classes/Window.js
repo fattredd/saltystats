@@ -9,10 +9,11 @@ class Window {
             height: 1020,
             width: 1280,
             url: "https://www.saltybet.com/",
-            imgPath: "./src/",
+            imgPath: "./public/img/scrot/",
             imgExt: ".png"
         };
         this.lastState = -1;
+        this.ratio = "";
         this.page;
         this.browser;
         this.Red;
@@ -49,7 +50,7 @@ class Window {
         // TODO: ensure twitch is loaded
         const now = new Date();
         const dt = date.format(now, 'YYYY.MM.DD_HH.mm.ss')
-        await this.page.screenshot({path: this.options.imgPath + dt + this.options.imgExt});
+        await this.page.screenshot({path: this.options.imgPath + dt + `_${this.Red} vs ${this.Blue}` + this.options.imgExt});
     }
 
     async getStats(result) {
@@ -60,15 +61,24 @@ class Window {
         return text;
     };
     
-    async getFighters(result) {
-        const elem = await this.page.$('#player1');
-        if (!elem) console.log("Error finding element");
-        this.Red = await elem.getProperty("value").then(x => x.jsonValue());
+    async getFighters(method = false) {
+        // Primary method during bets
+        let redSel = '#player1';
+        let blueSel = '#player2';
+        let prop = "value";
+        if (method) {
+            redSel = '#odds .redtext';
+            blueSel = '#odds .bluetext';
+            prop = "innerText";
+        }
+        const elem = await this.page.$(redSel);
+        if (!elem) console.log("Error finding element", method);
+        this.Red = await elem.getProperty(prop).then(x => x.jsonValue());
         this.Red = this.Red.trim();
 
-        const elem2 = await this.page.$('#player2');
+        const elem2 = await this.page.$(blueSel);
         if (!elem2) console.log("Error finding element");
-        this.Blue = await elem2.getProperty("value").then(x => x.jsonValue());
+        this.Blue = await elem2.getProperty(prop).then(x => x.jsonValue());
         this.Blue = this.Blue.trim();
 
         console.log(`Fighters are ${this.Red} (red) and ${this.Blue} (blue)`);
@@ -107,7 +117,7 @@ class Window {
         }
         let text = await elem.getProperty("innerText").then(x => x.jsonValue());
         text = text.trim();
-        return text.slice(text.search("Team "), text.length-1);
+        return text.slice(text.lastIndexOf("Team "), text.length-1);
     }
 
     async fetchData(result) {
@@ -115,22 +125,25 @@ class Window {
         if (currState == this.lastState) {
             return;
         }
-        this.lastState = currState;
-        if (currState == 0) { // OPEN
+        if (currState == 0 || this.lastState == -1) { // OPEN
+            const altMode = this.lastState == -1 && currState != 0;
             await this.getFighters();
             db.addFighter(this.Red);
             db.addFighter(this.Blue);
-        } else if (currState == 1) {
-            this.getScrot();
-            const ratio = await this.getStats();
-            db.addFight(this.Red, this.Blue, ratio);
-        } else if (currState == 2) {
+        }
+        if (currState == 1) {
+            setTimeout(this.getScrot, 500);
+            this.ratio = await this.getStats();
+        } else if (currState == 2 && this.lastState != -1) {
             const winner = await this.getWinner();
             const winBool = winner == 'Red';
             console.log(`The winner is ${winner}!`);
             db.addResult(this.Red, winBool);
             db.addResult(this.Blue, !winBool);
+            console.log(`Adding fight...`);
+            db.addFight(this.Red, this.Blue, this.ratio, winner);
         }
+        this.lastState = currState;
     }
 }
 
