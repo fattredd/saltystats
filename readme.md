@@ -17,6 +17,7 @@ I used VSCode as an editor, and DBeaver as a convenient way of watching/editting
 - [Socket.io](https://markrabey.com/2014/05/05/real-time-analytics-with-node-js-socket-io/)
 - [Node structure](https://stackoverflow.com/questions/5778245/expressjs-how-to-structure-an-appication)
 - [Promises](https://medium.com/javascript-scene/master-the-javascript-interview-what-is-a-promise-27fc71e77261)
+- [Puppeteer](https://medium.com/stink-studios/real-time-scraping-using-puppeteer-40495b5fc270)
 
 ## Condiserations
 
