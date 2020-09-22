@@ -18,7 +18,7 @@ class Window {
             imgExt: ".png",
             headless: true,
             bettingFloor: 1000, // All in under this val
-            bet: false
+            bet: true
         };
         this.lastState = -1;
         this.ratio = "";
