@@ -58,30 +58,20 @@ async function addResult(name, result) {
 }
 
 async function getFighter(name) {
-    if (name == "") return;
-    var stats = {}
+    if (name == "") return [0,0];
+    name = name.replace('\'','');
 
-    let db = new sqlite3.Database('./fights.sqlite', (err) => {
-        if (err) {console.log("addFighter Error", err);}
-        
-        name = name.replace('\'','');
-        let qry = SqlString.format(`SELECT * FROM fighter WHERE name = '${name}'`);
-        db.get(qry, (err, row) => {
+    let db = new sqlite3.Database('./fights.sqlite');
+    let qry = SqlString.format(`SELECT * FROM fighter WHERE name = '${name}'`);
+
+    return new Promise((resolve) => db.get(qry, (err, row) => {
             if (row == undefined) {
-                qry = SqlString.format(`INSERT INTO fighter ('name') VALUES ('${name}')`);
-                db.run(qry, (err) => {
-                    if (err) {console.log("addFighter Error", err);}
-                    console.log(`Added new fighter ${name}`);
-                    stats['win'] = 0;
-                    stats['loss'] = 0;
-                });
+                var result = [0,0];
             } else {
-                stats['win'] = row.win;
-                stats['loss'] = row.loss;
+                var result = [row.win,row.loss];
             }
-        });
-    });
-    return stats;
+            resolve(result);
+        }));
 }
 
 exports.addFighter = addFighter;

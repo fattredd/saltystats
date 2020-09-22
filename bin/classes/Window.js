@@ -3,6 +3,8 @@ const db = require('./Database.js');
 const date = require('date-and-time');
 const fs = require("fs");
 const jimp = require("jimp");
+const CREDS = require("../../creds");
+const { Console } = require('console');
 
 class Window {
 
@@ -10,10 +12,12 @@ class Window {
         this.options = {
             height: 1020,
             width: 1280,
+            loginUrl: "https://www.saltybet.com/authenticate?signin=1",
             url: "https://www.saltybet.com/",
             imgPath: "./public/img/scrot/",
             imgExt: ".png",
-            headless: true
+            headless: true,
+            bet: false
         };
         this.lastState = -1;
         this.ratio = "";
@@ -32,7 +36,19 @@ class Window {
             // executablePath: '/usr/bin/google-chrome-stable' // Linux
         });
         this.page = await this.browser.newPage();
-        await this.page.goto(this.options.url);
+        
+        // Login
+        await this.page.goto(this.options.loginUrl, { waitUntil: 'networkidle0' });
+        await this.page.type('#email', CREDS['email']);
+        await this.page.type('#pword', CREDS['pass']);
+        // click and wait for navigation
+        await Promise.all([
+            this.page.click('.submit'),
+            this.page.waitForNavigation(),
+        ]);
+        console.log("Logged in");
+
+        // await this.page.goto(this.options.url);
         await this.page.evaluate(() => {
             localStorage.setItem('mature', 'true')
             localStorage.setItem('video-muted', '{"default":false}')
@@ -81,7 +97,7 @@ class Window {
         let redSel = '#player1';
         let blueSel = '#player2';
         let prop = "value";
-        if (method) {
+        if (method) { // If we're already fighting, use this
             redSel = '#odds .redtext';
             blueSel = '#odds .bluetext';
             prop = "innerText";
@@ -135,22 +151,78 @@ class Window {
         return text.slice(text.lastIndexOf("Team "), text.length-1);
     }
 
+    async getBalance() {
+        const numDat = await this.page.$('#balance');
+        const num = await numDat.getProperty("innerText").then(x => x.jsonValue());
+        return parseInt(num.replace(',',''));
+    }
+
+    async placeBet(fighter, amount) {
+        // Note that the last placed bet is used, so someone watching
+        //  a fight will always be able to bet normally
+        if (fighter == 'red') {
+            var selector = '#player1';
+        } else {
+            var selector = '#player2';
+        }
+        amount = Math.floor(amount);
+        await this.page.type('#wager', amount.toString());
+        if (this.options.bet) {
+            await this.page.click(selector);
+        } else {
+            console.log("Betting disabled in options");
+        }
+        console.log(`Bet of \$${amount} placed for ${fighter}`)
+    }
+
+    async chooseBet(p1, p2) {
+        const balance = await this.getBalance();
+        const redStats = await db.getFighter(p1);
+        const blueStats = await db.getFighter(p2);
+        console.log("bet:",balance,redStats,blueStats);
+        // 0 - Win
+        // 1 - Loss
+        if (redStats[0] > blueStats[0]) // More wins
+            return ['red',balance*0.6];
+        if (redStats[0] < blueStats[0])
+            return ['blue',balance*0.6];
+
+        if (redStats[0] > redStats[1]) // Win > loss
+            return ['red',balance*0.1];
+        if (blueStats[0] > blueStats[1]) 
+            return ['blue',balance*0.1];
+
+        if (redStats[1] > blueStats[1]) // Less loss
+            return ['blue',balance*0.3];
+        if (redStats[1] < blueStats[1])
+            return ['red',balance*0.3];
+        return ['red',1];
+    }
+
     async fetchData(result) {
         const currState = await this.getState();
         this.page.screenshot({path: "./public/img/scrot" + this.options.imgExt});
         if (currState == this.lastState) {
             return;
         }
-        if (currState == 0 || this.lastState == -1) { // OPEN
+        if (currState == 0 || this.lastState == -1) { // OPEN or fresh launch
             const altMode = this.lastState == -1 && currState != 0;
-            await this.getFighters();
+            this.lastState = currState;
+            await this.getFighters(altMode);
             db.addFighter(this.Red);
             db.addFighter(this.Blue);
+
+            if (this.Red != '' && !altMode) {
+                const bet = await this.chooseBet(this.Red, this.Blue);
+                this.placeBet(bet[0],bet[1]);
+            }
+            this.lastState = currState;
         }
-        if (currState == 1) {
+        this.lastState = currState;
+        if (currState == 1) { // LOCKED
             this.getScrot();
             this.ratio = await this.getStats();
-        } else if (currState == 2 && this.lastState != -1) {
+        } else if (currState == 2 && this.lastState != -1) { // WIN
             const winner = await this.getWinner();
             const winBool = winner == 'Red';
             console.log(`The winner is ${winner}!`);
@@ -158,7 +230,6 @@ class Window {
             db.addResult(this.Blue, !winBool);
             db.addFight(this.Red, this.Blue, this.ratio, winner);
         }
-        this.lastState = currState;
     }
 }
 
