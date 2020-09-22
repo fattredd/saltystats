@@ -17,6 +17,7 @@ class Window {
             imgPath: "./public/img/scrot/",
             imgExt: ".png",
             headless: true,
+            bettingFloor: 1000, // All in under this val
             bet: false
         };
         this.lastState = -1;
@@ -165,7 +166,6 @@ class Window {
         } else {
             var selector = '#player2';
         }
-        amount = Math.floor(amount);
         await this.page.type('#wager', amount.toString());
         if (this.options.bet) {
             await this.page.click(selector);
@@ -180,23 +180,41 @@ class Window {
         const redStats = await db.getFighter(p1);
         const blueStats = await db.getFighter(p2);
         console.log("bet:",balance,redStats,blueStats);
+        let color = 'red';
+        let num = 1;
         // 0 - Win
         // 1 - Loss
-        if (redStats[0] > blueStats[0]) // More wins
-            return ['red',balance*0.6];
-        if (redStats[0] < blueStats[0])
-            return ['blue',balance*0.6];
+        if (redStats[0] > blueStats[0]) {// More wins
+            color = 'red';
+            num = balance*0.6;
+        }
+        if (redStats[0] < blueStats[0]) {
+            color = 'blue';
+            num = balance*0.6;
+        }
 
-        if (redStats[0] > redStats[1]) // Win > loss
-            return ['red',balance*0.1];
-        if (blueStats[0] > blueStats[1]) 
-            return ['blue',balance*0.1];
+        if (redStats[0] > redStats[1]) { // Win > loss
+            color = 'red';
+            num = balance*0.1;
+        }
+        if (blueStats[0] > blueStats[1])  {
+            color = 'blue';
+            num = balance*0.1;
+        }
 
-        if (redStats[1] > blueStats[1]) // Less loss
-            return ['blue',balance*0.3];
-        if (redStats[1] < blueStats[1])
-            return ['red',balance*0.3];
-        return ['red',1];
+        if (redStats[1] > blueStats[1]) { // Less loss  
+            color = 'blue';
+            num = balance*0.3;
+        }
+        if (redStats[1] < blueStats[1])  {
+            color = 'red';
+            num = balance*0.1;
+        }
+        
+        if (balance < this.options.bettingFloor)
+            num = balance;
+        num = Math.floor(num);
+        return [color, num];
     }
 
     async fetchData(result) {
