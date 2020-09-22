@@ -11,7 +11,7 @@ router.get('/', function(req, res, next) {
   let db = new sqlite3.Database('./fights.sqlite', (err) => {
     if (err) throw err;
 
-    let qry = "SELECT * FROM fighter ORDER BY win/(1.0*(win+loss)) DESC LIMIT 20";
+    let qry = "SELECT * FROM fighter ORDER BY win+loss DESC LIMIT 20"; // win/(1.0*(win+loss))
     db.each(qry, (err, row) => {
       newRow = row;
       newRow.total = row.win+row.loss;

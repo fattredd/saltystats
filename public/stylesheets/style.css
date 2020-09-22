@@ -63,9 +63,9 @@ table#cent {
 
 .fights {
   float: left;
-  min-width: 45%;
+  max-width: 50%;
 }
 .fighters {
   float: right;
-  min-width: 45%;
+  max-width: 50%;
 }

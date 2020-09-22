@@ -8,14 +8,19 @@ async function addFighter(name) {
     let db = new sqlite3.Database('./fights.sqlite', (err) => {
         if (err) {console.log("addFighter Error", err);}
         
+        name = name.replace('\'','');
         let qry = SqlString.format(`SELECT * FROM fighter WHERE name = '${name}'`);
         db.get(qry, (err, row) => {
             if (row == undefined) {
                 qry = SqlString.format(`INSERT INTO fighter ('name') VALUES ('${name}')`);
                 db.run(qry, (err) => {
                     if (err) {console.log("addFighter Error", err);}
-                    console.log(`Added new fighter ${name}`);
+                    //console.log(`Added new fighter ${name}`);
                 });
+            } else {
+                let win = row.win;
+                let loss = row.loss;
+                //console.log(`Fighter found ${name} with stats: ${win}|${loss}`);
             }
         });
     });
@@ -25,10 +30,12 @@ async function addFight(red, blue, ratio, winner) {
     if (red == "") return;
     let db = new sqlite3.Database('./fights.sqlite', (err) => {
         if (err) {console.log("addFight Error", err);}
-        let qry = SqlString.format(`INSERT INTO fight ('red', 'blue', 'ratio','winner') VALUES ('${red}','${blue}','${ratio}','${winner}')`);
+        red = red.replace('\'','');
+        blue = blue.replace('\'','');
+        let qry = SqlString.format(`INSERT INTO fight ('red', 'blue', 'ratio','winner') VALUES (\"${red}\",\"${blue}\",'${ratio}','${winner}')`);
         db.get(qry, (err, row) => {
             if (err) {console.log("addFighter Error", err);}
-            console.log(`Added new fight ${red} vs ${blue} at ${ratio}`);
+            console.log(`Added new fight ${red} vs ${blue} at ${ratio}\r\n`);
         });
     });
 }
@@ -42,14 +49,42 @@ async function addResult(name, result) {
         if (result == 0) {
             strResult = "loss";
         }
+        name = name.replace('\'','');
         let qry = SqlString.format(`UPDATE fighter SET ${strResult} = ${strResult} + 1 WHERE name = '${name}'`);
         db.get(qry, (err, row) => {
             if (err) {console.log("addResult update Error", err);}
-            console.log(`Updated ${strResult} for ${name}`);
         });
     });
 }
 
+async function getFighter(name) {
+    if (name == "") return;
+    var stats = {}
+
+    let db = new sqlite3.Database('./fights.sqlite', (err) => {
+        if (err) {console.log("addFighter Error", err);}
+        
+        name = name.replace('\'','');
+        let qry = SqlString.format(`SELECT * FROM fighter WHERE name = '${name}'`);
+        db.get(qry, (err, row) => {
+            if (row == undefined) {
+                qry = SqlString.format(`INSERT INTO fighter ('name') VALUES ('${name}')`);
+                db.run(qry, (err) => {
+                    if (err) {console.log("addFighter Error", err);}
+                    console.log(`Added new fighter ${name}`);
+                    stats['win'] = 0;
+                    stats['loss'] = 0;
+                });
+            } else {
+                stats['win'] = row.win;
+                stats['loss'] = row.loss;
+            }
+        });
+    });
+    return stats;
+}
+
 exports.addFighter = addFighter;
+exports.getFighter = getFighter;
 exports.addFight = addFight;
 exports.addResult = addResult;

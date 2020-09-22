@@ -8,7 +8,10 @@ const dest = "./public/img/current.jpg";
 
 const watcher = fs.watchFile(origin, (curr,prev) => {
     jimp.read(origin, (err, file) => {
-        if (err) console.log("Failed to load img.");
+        if (err) {
+            console.log("Failed to load img.");
+            rerturn;
+        }
         file
             .crop(300, 160,  680, 512)
             .quality(60)

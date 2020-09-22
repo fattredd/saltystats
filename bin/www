@@ -8,6 +8,8 @@ var app = require('../server');
 var debug = require('debug')('salty:server');
 var http = require('http');
 
+var blue = "";
+var red = "";
 /**
  * Get port from environment and store in Express.
  */
@@ -28,7 +30,6 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-
 /**
  * Normalize a port into a number, string, or false.
  */

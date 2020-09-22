@@ -1,6 +1,8 @@
 const pupp = require('puppeteer');
 const db = require('./Database.js');
 const date = require('date-and-time');
+const fs = require("fs");
+const jimp = require("jimp");
 
 class Window {
 
@@ -51,7 +53,19 @@ class Window {
         // TODO: ensure twitch is loaded
         const now = new Date();
         const dt = date.format(now, 'YYYY.MM.DD_HH.mm.ss');
-        await this.page.screenshot({path: this.options.imgPath + dt + `_${this.Red} vs ${this.Blue}` + this.options.imgExt});
+        const path = this.options.imgPath + dt + `_${this.Red} vs ${this.Blue}` + this.options.imgExt;
+        await this.page.screenshot({path: path});
+        jimp.read(path, (err, file) => {
+            if (err) {
+                console.log("Failed to load img.");
+                rerturn;
+            }
+            file
+                .crop(300, 160,  680, 510)
+                .scale(0.6)
+                .quality(60)
+                .write(path);
+        });
     }
 
     async getStats(result) {
