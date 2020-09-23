@@ -113,7 +113,7 @@ class Window {
         this.Blue = await elem2.getProperty(prop).then(x => x.jsonValue());
         this.Blue = this.Blue.trim();
 
-        console.log(`Fighters are ${this.Red} (red) and ${this.Blue} (blue)`);
+        console.log(`\r\nFighters are ${this.Red} (red) and ${this.Blue} (blue)`);
     };
 
     async getState(result) {
@@ -177,6 +177,7 @@ class Window {
 
     async chooseBet(p1, p2) {
         const balance = await this.getBalance();
+        const fight = await db.getFight(p1, p2);
         const redStats = await db.getFighter(p1);
         const blueStats = await db.getFighter(p2);
         console.log("bet:",balance,redStats,blueStats);
@@ -185,7 +186,11 @@ class Window {
         // 0 - Win
         // 1 - Loss
         // 2 - Ratio
-        if (redStats[2] > blueStats[2]) {// Better ratio // confidence interval?
+        if (fight != null) { // Has the fight happened before?
+            console.log(`Fight found! Last winner was ${fight}`)
+            color = fight;
+            num = balance;
+        } else if (redStats[2] > blueStats[2]) {// Better ratio // confidence interval?
             color = 'red';
             num = balance*0.5;
         } else if (redStats[2] < blueStats[2]) {

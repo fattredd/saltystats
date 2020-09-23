@@ -35,7 +35,7 @@ async function addFight(red, blue, ratio, winner) {
     
     return new Promise((resolve) => db.get(qry, (err, row) => {
         if (err) {console.log("addFighter Error", err);}
-        console.log(`Added new fight ${red} vs ${blue} at ${ratio}\r\n`);
+        //console.log(`Added new fight ${red} vs ${blue} at ${ratio}\r\n`);
         resolve();
     }));
 }
@@ -74,7 +74,39 @@ async function getFighter(name) {
         }));
 }
 
+async function getFight(red, blue) {
+    red = red.replace('\'','');
+    blue = blue.replace('\'','');
+
+    let db = new sqlite3.Database('./fights.sqlite');
+    let qry = SqlString.format(
+        `SELECT * FROM fight WHERE red = '${red}' AND blue = '${blue}'`
+    );
+
+    return new Promise((resolve) => db.get(qry, (err, row) => {
+            if (row == undefined) {
+                qry = SqlString.format(
+                    `SELECT * FROM fight WHERE red = '${blue}' AND blue = '${red}'`
+                );
+                db.get(qry, (err, row) => {
+                    if (row == undefined) {
+                        var result = null;
+                        // We haven't seen this before
+                    } else {
+                        // Swap the winner b/c we swapped fighters
+                        var result = row.winner=='red' ? 'blue': 'red';
+                    }
+                });
+            } else {
+                // Found the fight!
+                var result = row.winner;
+            }
+            resolve(result);
+        }));
+}
+
 exports.addFighter = addFighter;
 exports.getFighter = getFighter;
+exports.getFight = getFight;
 exports.addFight = addFight;
 exports.addResult = addResult;
