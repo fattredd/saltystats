@@ -17,7 +17,7 @@ class Window {
             imgPath: "./public/img/scrot/",
             imgExt: ".png",
             headless: true,
-            bettingFloor: 1000, // All in under this val
+            bettingFloor: 500, // All in under this val
             bet: true
         };
         this.lastState = -1;
@@ -184,33 +184,36 @@ class Window {
         let num = 1;
         // 0 - Win
         // 1 - Loss
-        if (redStats[0] > blueStats[0]) {// More wins
+        // 2 - Ratio
+        if (redStats[2] > blueStats[2]) {// Better ratio
             color = 'red';
-            num = balance*0.6;
-        }
-        if (redStats[0] < blueStats[0]) {
+            num = balance*0.5;
+        } else if (redStats[2] < blueStats[2]) {
             color = 'blue';
-            num = balance*0.6;
-        }
-
-        if (redStats[0] > redStats[1]) { // Win > loss
+            num = balance*0.5;
+        } else if (redStats[0] > blueStats[0]) {// More wins
             color = 'red';
-            num = balance*0.1;
-        }
-        if (blueStats[0] > blueStats[1])  {
-            color = 'blue';
-            num = balance*0.1;
-        }
-
-        if (redStats[1] > blueStats[1]) { // Less loss  
+            num = balance*0.3;
+        } else if (redStats[0] < blueStats[0]) {
             color = 'blue';
             num = balance*0.3;
-        }
-        if (redStats[1] < blueStats[1])  {
+        } else if (redStats[0] > redStats[1]) { // Win > loss
             color = 'red';
             num = balance*0.1;
+        } else if (blueStats[0] > blueStats[1])  {
+            color = 'blue';
+            num = balance*0.1;
+        } else if (redStats[1] > blueStats[1]) { // Less loss  
+            color = 'blue';
+            num = balance*0.1;
+        } else if (redStats[1] < blueStats[1])  {
+            color = 'red';
+            num = balance*0.1;
+        } else if (redStats == blueStats)  { // Same, just get exp
+            color = 'red';
+            num = 1;
         }
-        
+
         if (balance < this.options.bettingFloor)
             num = balance;
         num = Math.floor(num);

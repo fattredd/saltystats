@@ -3,12 +3,12 @@ const fs = require('fs');
 const prog = require('cli-progress');
 
 (async () => {
-    const bar1 = new prog.SingleBar({}, prog.Presets.shades_classic);
+    const progress = new prog.SingleBar({}, prog.Presets.shades_classic);
 
-    const num = 0;
+    const num = 4;
     const f = fs.readFileSync(`./bin/data/SaltyBet Records ${num}.json`);
     const data = await JSON.parse(f);
-    bar1.start(data.length, 0);
+    progress.start(data.length-1, 0);
 
     for (var i=0; i<data.length; i++) {
         let fighters = parseEntry(data[i]);
@@ -16,10 +16,10 @@ const prog = require('cli-progress');
         await db.addFighter(fighters[1]);
         await db.addResult(fighters[0],1);
         await db.addResult(fighters[1],0);
-        bar1.update(i);
+        progress.update(i);
 
     }
-    bar1.stop();
+    progress.stop();
     console.log("Imported All", num)
 })();
 

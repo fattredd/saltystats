@@ -57,7 +57,7 @@ async function addResult(name, result) {
 }
 
 async function getFighter(name) {
-    if (name == "") return [0,0];
+    if (name == "") return [0,0,0];
     name = name.replace('\'','');
 
     let db = new sqlite3.Database('./fights.sqlite');
@@ -65,9 +65,10 @@ async function getFighter(name) {
 
     return new Promise((resolve) => db.get(qry, (err, row) => {
             if (row == undefined) {
-                var result = [0,0];
+                var result = [0,0,0];
             } else {
-                var result = [row.win,row.loss];
+                let winRate = (row.win+row.loss==0) ? 0 : (row.win/parseFloat(row.win+row.loss));
+                var result = [row.win,row.loss, winRate];
             }
             resolve(result);
         }));
