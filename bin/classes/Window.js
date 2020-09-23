@@ -185,7 +185,7 @@ class Window {
         // 0 - Win
         // 1 - Loss
         // 2 - Ratio
-        if (redStats[2] > blueStats[2]) {// Better ratio
+        if (redStats[2] > blueStats[2]) {// Better ratio // confidence interval?
             color = 'red';
             num = balance*0.5;
         } else if (redStats[2] < blueStats[2]) {
