@@ -9,6 +9,7 @@
     "startbak": "nodemon ./bin/scraper"
   },
   "dependencies": {
+    "cli-progress": "^3.8.2",
     "cookie-parser": "~1.4.4",
     "date-and-time": "^0.14.1",
     "debug": "~2.6.9",
