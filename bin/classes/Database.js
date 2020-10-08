@@ -107,13 +107,11 @@ async function getFight(red, blue) {
 
 
 async function addStats(bet, result, balance) {
-    if (name == "") return;
     let db = new sqlite3.Database('./fights.sqlite');
     let strResult = "succ";
-    if (result == 0) {
+    if (!result) {
         strResult = "fail";
     }
-    name = name.replace('\'','');
     let qry = SqlString.format(`UPDATE stats SET ${strResult} = ${strResult} + 1, spent = spent + ${bet}, highest = MAX(highest,${balance})`);
         
     return new Promise((resolve) => db.get(qry, (err, row) => {

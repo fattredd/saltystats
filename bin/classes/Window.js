@@ -255,12 +255,14 @@ class Window {
             this.getScrot();
             this.ratio = await this.getStats();
         } else if (currState == 2 && this.lastState != -1) { // WIN
-            const winner = await this.getWinner();
-            const winBool = winner == 'Red';
+            let winner = await this.getWinner();
+            winner = winner.toLowerCase()
+            const winBool = winner.includes('red');
             console.log(`The winner is ${winner}!`);
             db.addResult(this.Red, winBool);
             db.addResult(this.Blue, !winBool);
-            db.addStats(this.bet, this.selected == winner, this.balance);
+            if (this.selected != undefined)
+               db.addStats(this.bet, winner.includes(this.selected), this.balance);
             db.addFight(this.Red, this.Blue, this.ratio, winner);
         }
     }
