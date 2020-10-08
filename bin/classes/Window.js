@@ -26,6 +26,9 @@ class Window {
         this.browser;
         this.Red;
         this.Blue;
+        this.balance;
+        this.bet;
+        this.selected;
     }
 
     async init(callback) {
@@ -192,10 +195,10 @@ class Window {
             num = balance;
         } else if (redStats[2] > blueStats[2]) {// Better ratio // confidence interval?
             color = 'red';
-            num = balance*0.5;
+            num = balance*0.3;
         } else if (redStats[2] < blueStats[2]) {
             color = 'blue';
-            num = balance*0.5;
+            num = balance*0.3;
         } else if (redStats[0] > blueStats[0]) {// More wins
             color = 'red';
             num = balance*0.3;
@@ -222,6 +225,9 @@ class Window {
         if (balance < this.options.bettingFloor)
             num = balance;
         num = Math.floor(num);
+        this.balance = balance;
+        this.bet = num;
+        this.selected = color;
         return [color, num];
     }
 
@@ -254,6 +260,7 @@ class Window {
             console.log(`The winner is ${winner}!`);
             db.addResult(this.Red, winBool);
             db.addResult(this.Blue, !winBool);
+            db.addStats(this.bet, this.selected == winner, this.balance);
             db.addFight(this.Red, this.Blue, this.ratio, winner);
         }
     }

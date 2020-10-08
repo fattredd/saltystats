@@ -68,7 +68,7 @@ async function getFighter(name) {
                 var result = [0,0,0];
             } else {
                 let winRate = (row.win+row.loss==0) ? 0 : (row.win/parseFloat(row.win+row.loss));
-                var result = [row.win,row.loss, winRate];
+                var result = [row.win,row.loss, winRate.toFixed(3)];
             }
             resolve(result);
         }));
@@ -105,8 +105,26 @@ async function getFight(red, blue) {
         }));
 }
 
+
+async function addStats(bet, result, balance) {
+    if (name == "") return;
+    let db = new sqlite3.Database('./fights.sqlite');
+    let strResult = "succ";
+    if (result == 0) {
+        strResult = "fail";
+    }
+    name = name.replace('\'','');
+    let qry = SqlString.format(`UPDATE stats SET ${strResult} = ${strResult} + 1, spent = spent + ${bet}, highest = MAX(highest,${balance})`);
+        
+    return new Promise((resolve) => db.get(qry, (err, row) => {
+        if (err) {console.log("addStats update Error", err);}
+        resolve();
+    }));
+}
+
 exports.addFighter = addFighter;
 exports.getFighter = getFighter;
 exports.getFight = getFight;
 exports.addFight = addFight;
 exports.addResult = addResult;
+exports.addStats = addStats;
