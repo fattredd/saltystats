@@ -1,9 +1,56 @@
 const sqlite3 = require('sqlite3');
 const SqlString = require('sqlstring');
 
+var db = new sqlite3.Database('./fights.sqlite');
+
+async function setupDB() {
+
+    let qry = SqlString.format(
+        `CREATE TABLE IF NOT EXISTS 'stats' (
+			'id' INTEGER,
+            'succ' INTEGER DEFAULT 0,
+            'fail' INTEGER DEFAULT 0,
+            'spent' INTEGER DEFAULT 0,
+            'highest' INTEGER DEFAULT 0,
+            'gains' INTEGER DEFAULT 0,
+            'antigains' INTEGER DEFAULT 0,
+			CONSTRAINT 'id' PRIMARY KEY (id)
+        )`);
+
+    return new Promise((resolve) => db.run(qry, (err, row) => {
+        if (err) { console.log("setupDB stats Error", err); }
+        qry = SqlString.format(`INSERT INTO 'stats' ('id') VALUES (0) ON CONFLICT DO NOTHING`);
+        db.run(qry, (err) => {
+            if (err) { console.log("setupDB insert Error", err); }
+            qry = SqlString.format(
+                `CREATE TABLE IF NOT EXISTS 'fighter' (id INTEGER,
+                    'name' TEXT NOT NULL,
+                    'win' INTEGER DEFAULT 0,
+                    'loss' INTEGER DEFAULT 0,
+                    CONSTRAINT 'id' PRIMARY KEY (id)
+                )`);
+            db.run(qry, (err) => {
+                if (err) { console.log("setupDB fighter Error", err); }
+                qry = SqlString.format(
+                    `CREATE TABLE IF NOT EXISTS 'fight' (
+                        'id' INTEGER,
+                        'red' TEXT,
+                        'blue' TEXT,
+                        'ratio' TEXT,
+                        'winner' TEXT,
+                        CONSTRAINT 'id' PRIMARY KEY (id)
+                    )`);
+                db.run(qry, (err) => {
+                    if (err) { console.log("setupDB fight Error", err); }
+                    resolve();
+                });
+            });
+        });
+    }));
+}
+
 async function addFighter(name) {
     if (name == "") return;
-    let db = new sqlite3.Database('./fights.sqlite');
 
     name = name.replace('\'', '');
     let qry = SqlString.format(`SELECT * FROM fighter WHERE name = '${name}'`);
@@ -13,21 +60,18 @@ async function addFighter(name) {
             qry = SqlString.format(`INSERT INTO fighter ('name') VALUES ('${name}')`);
             db.run(qry, (err) => {
                 if (err) { console.log("addFighter Error", err); }
-                //console.log(`Added new fighter ${name}`);
                 resolve();
             });
         } else {
             let win = row.win;
             let loss = row.loss;
             resolve();
-            //console.log(`Fighter found ${name} with stats: ${win}|${loss}`);
         }
     }));
 }
 
 async function addFight(red, blue, ratio, winner) {
     if (red == "") return;
-    let db = new sqlite3.Database('./fights.sqlite');
     red = red.replace('\'', '');
     blue = blue.replace('\'', '');
     let qry = SqlString.format(`INSERT INTO fight ('red', 'blue', 'ratio','winner') VALUES (\"${red}\",\"${blue}\",'${ratio}','${winner}')`);
@@ -41,7 +85,6 @@ async function addFight(red, blue, ratio, winner) {
 
 async function addResult(name, result) {
     if (name == "") return;
-    let db = new sqlite3.Database('./fights.sqlite');
     let strResult = "win";
     if (result == 0) {
         strResult = "loss";
@@ -59,7 +102,6 @@ async function getFighter(name) {
     if (name == "") return [0, 0, 0];
     name = name.replace('\'', '');
 
-    let db = new sqlite3.Database('./fights.sqlite');
     let qry = SqlString.format(`SELECT * FROM fighter WHERE name = '${name}'`);
 
     return new Promise((resolve) => db.get(qry, (err, row) => {
@@ -77,7 +119,6 @@ async function getFight(red, blue) {
     red = red.replace('\'', '');
     blue = blue.replace('\'', '');
 
-    let db = new sqlite3.Database('./fights.sqlite');
     let qry = SqlString.format(
         `SELECT * FROM fight WHERE red = '${red}' AND blue = '${blue}'`
     );
@@ -106,7 +147,6 @@ async function getFight(red, blue) {
 
 
 async function addStats(bet, result, balance, newMoney) {
-    let db = new sqlite3.Database('./fights.sqlite');
     let strResult = "succ";
     let strMoney = "gains"; // This only logs money that WOULD be spent. It ignores manual bets
     let betResult = newMoney;
@@ -129,3 +169,4 @@ exports.getFight = getFight;
 exports.addFight = addFight;
 exports.addResult = addResult;
 exports.addStats = addStats;
+exports.setupDB = setupDB;

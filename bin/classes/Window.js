@@ -1,10 +1,8 @@
 const pupp = require('puppeteer');
 const db = require('./Database.js');
 const date = require('date-and-time');
-const fs = require("fs");
 const jimp = require("jimp");
 const CREDS = require("../../creds");
-const { Console } = require('console');
 
 class Window {
 
@@ -32,6 +30,7 @@ class Window {
     }
 
     async init(callback) {
+        db.setupDB();
         this.browser = await pupp.launch({
             headless: this.options.headless,
             defaultViewport: null, // Allow window to rescale
@@ -265,8 +264,12 @@ class Window {
         this.lastState = currState;
         if (currState == 1) { // LOCKED
             this.getScrot();
-            if (this.selected != undefined)
-                this.bet, this.newMoney, this.ratio = await this.getStats();
+            if (this.selected != undefined) {
+                const stats = await this.getStats();
+                this.bet = stats[0];
+                this.newMoney = stats[1];
+                this.ratio = stats[2];
+            }
         } else if (currState == 2 && this.lastState != -1) { // WIN
             let winner = await this.getWinner();
             winner = winner.toLowerCase()

@@ -3,3 +3,4 @@ package-lock.json
 public/img/scrot/*.png
 debug.log
 *.log
+public/img/scrot.png
