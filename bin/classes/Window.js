@@ -15,7 +15,7 @@ class Window {
             imgPath: "./public/img/scrot/",
             imgExt: ".png",
             headless: true,
-            bettingFloor: 500, // All in under this val
+            bettingFloor: 1000, // All in under this val
             bet: true
         };
         this.lastState = -1;
@@ -35,8 +35,8 @@ class Window {
             headless: this.options.headless,
             defaultViewport: null, // Allow window to rescale
             args: [`--window-size=${this.options.width},${this.options.height}`],
-            executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe' // Windows
-                // executablePath: '/usr/bin/google-chrome-stable' // Linux
+            // executablePath: 'C:\Program Files\Google\Chrome\Application\chrome.exe' // Windows
+            // executablePath: '/usr/bin/google-chrome-stable' // Linux
         });
         this.page = await this.browser.newPage();
 
@@ -65,6 +65,7 @@ class Window {
     }
 
     close() {
+        console.log("Closing.")
         this.browser.close();
     }
 
@@ -92,12 +93,17 @@ class Window {
         if (!elem) console.log("Error finding element");
         const spans = await elem.$$('span');
         var spanContent = [];
+        var reg;
         for (var s of spans) {
             let text = await s.getProperty("innerText").then(x => x.jsonValue());
             text = text.trim();
             const extractRegexp = /\+?\$?([\d\.]+)/g
-            const reg = extractRegexp.exec(text);
-            spanContent.push(reg[1])
+            reg = extractRegexp.exec(text);
+            try {
+                spanContent.push(reg[1])
+            } catch(e) {
+                console.log(reg,e)
+            }
         }
         let ratio = `${spanContent[2]}:${spanContent[3]}`;
         return [spanContent[0], spanContent[1], ratio];
@@ -235,6 +241,8 @@ class Window {
 
         if (balance < this.options.bettingFloor)
             num = balance;
+        if (balance > this.options.bettingFloor * 25) // We want to GAIN, not antiGAIN
+            num *= 0.2;
         num = Math.floor(num);
         this.balance = balance;
         this.bet = num;

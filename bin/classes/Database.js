@@ -4,7 +4,6 @@ const SqlString = require('sqlstring');
 var db = new sqlite3.Database('./fights.sqlite');
 
 async function setupDB() {
-
     let qry = SqlString.format(
         `CREATE TABLE IF NOT EXISTS 'stats' (
 			'id' INTEGER,
@@ -74,11 +73,11 @@ async function addFight(red, blue, ratio, winner) {
     if (red == "") return;
     red = red.replace('\'', '');
     blue = blue.replace('\'', '');
-    let qry = SqlString.format(`INSERT INTO fight ('red', 'blue', 'ratio','winner') VALUES (\"${red}\",\"${blue}\",'${ratio}','${winner}')`);
-
+    let qry = SqlString.format(`INSERT INTO fight ('red', 'blue', 'ratio','winner') \
+                            VALUES (\"${red}\",\"${blue}\",'${ratio}','${winner}')`);
     return new Promise((resolve) => db.get(qry, (err, row) => {
         if (err) { console.log("addFighter Error", err); }
-        //console.log(`Added new fight ${red} vs ${blue} at ${ratio}\r\n`);
+        console.log(`Added new fight ${red} vs ${blue} at ${ratio}\r\n`);
         resolve();
     }));
 }
